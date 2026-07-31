@@ -51,8 +51,27 @@ Example:
 ```python
 from io.ascii_reader import AsciiGridReader
 from envstretcher.batch_ascii_mapper import BatchAsciiMapper
-from envstretcher.mapping_definition import MappingDefinition
+from envstretcher.control_point import ControlPoint
+from envstretcher.mapping_definition import MappingStrategy
 from envstretcher.mapping_matrix import MappingMatrix
+from envstretcher.piecewise_affine_transform import PiecewiseAffineTransform
+from envstretcher.raster_geometry import RasterGeometry
+
+control_points = [
+    ControlPoint(id="1", source_x=0.0, source_y=0.0, target_x=0.0, target_y=0.0),
+    ControlPoint(id="2", source_x=10.0, source_y=0.0, target_x=6.0, target_y=0.0),
+    ControlPoint(id="3", source_x=10.0, source_y=10.0, target_x=6.0, target_y=6.0),
+    ControlPoint(id="4", source_x=0.0, source_y=10.0, target_x=0.0, target_y=6.0),
+]
+transform = PiecewiseAffineTransform(control_points=control_points)
+
+target_geometry = RasterGeometry(
+    rows=6,
+    columns=6,
+    x_min=0.0,
+    y_min=0.0,
+    cell_size=1.0,
+)
 
 definition = MappingDefinition.read("nwmed_to_anchovybay_mapping.json")
 transform = definition.to_transform()
