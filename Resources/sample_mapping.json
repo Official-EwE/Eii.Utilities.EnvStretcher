@@ -1,0 +1,21 @@
+{
+  "points": [
+    {
+      "id": "1",
+      "name": "North breakwater",
+      "source": [4.132, 43.221],
+      "target": [17.5, 21.0]
+    },
+    {
+      "id": "B",
+      "name": "Central basin",
+      "source": [3.918, 43.108],
+      "target": [11.2, 11.5]
+    }
+  ],
+
+  "triangles": [
+    ["1", "2", "B"],
+    ["2", "3", "B"]
+  ]
+}
