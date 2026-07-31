@@ -11,6 +11,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from envstretcher.control_point import ControlPoint
+from envstretcher.piecewise_affine_transform import PiecewiseAffineTransform
 
 FloatArray = NDArray[np.float64]
 IntArray = NDArray[np.int64]
@@ -56,6 +57,13 @@ class MappingDefinition:
                 for point in self.points
             ],
             dtype=np.float64,
+        )
+
+    def to_transform(self) -> PiecewiseAffineTransform:
+        """Build a PiecewiseAffineTransform from this definition."""
+        return PiecewiseAffineTransform(
+            control_points=list(self.points),
+            triangles=list(self.triangles) if self.triangles is not None else None,
         )
 
     @property

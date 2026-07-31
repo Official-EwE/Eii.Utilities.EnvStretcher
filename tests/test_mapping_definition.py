@@ -4,6 +4,7 @@ import pytest
 
 from envstretcher.mapping_definition import MappingDefinition
 from envstretcher.mapping_definition import MappingStrategy
+from envstretcher.piecewise_affine_transform import PiecewiseAffineTransform
 
 
 def _minimal_mapping_dict() -> dict[str, object]:
@@ -37,4 +38,32 @@ def test_mapping_definition_rejects_invalid_mapping_strategy() -> None:
 
     with pytest.raises(ValueError, match="Invalid mapping strategy"):
         MappingDefinition.from_dict(data)
+
+
+def test_to_transform_returns_piecewise_affine_transform() -> None:
+    mapping = MappingDefinition.from_dict(_minimal_mapping_dict())
+
+    transform = mapping.to_transform()
+
+    assert isinstance(transform, PiecewiseAffineTransform)
+    assert len(transform.control_points) == 3
+
+
+def test_to_transform_uses_delaunay_when_no_triangles() -> None:
+    mapping = MappingDefinition.from_dict(_minimal_mapping_dict())
+
+    transform = mapping.to_transform()
+
+    assert len(transform.triangles) == 1
+
+
+def test_to_transform_uses_explicit_triangles() -> None:
+    data = _minimal_mapping_dict()
+    data["triangles"] = [["1", "2", "3"]]
+
+    mapping = MappingDefinition.from_dict(data)
+    transform = mapping.to_transform()
+
+    assert len(transform.triangles) == 1
+    assert set(transform.triangle_ids[0]) == {"1", "2", "3"}
 

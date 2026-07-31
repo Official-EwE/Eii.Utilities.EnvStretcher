@@ -4,6 +4,7 @@ from dataclasses import dataclass
 import numpy as np
 from numpy.typing import NDArray
 
+from envstretcher.raster_geometry import RasterGeometry
 
 FloatArray = NDArray[np.float64]
 
