@@ -73,16 +73,20 @@ target_geometry = RasterGeometry(
     cell_size=1.0,
 )
 
+definition = MappingDefinition.read("nwmed_to_anchovybay_mapping.json")
+transform = definition.to_transform()
+basemap = AsciiGridReader.read("anchovybay.asc")
+target_geometry = basemap.geometry
+
 # phase 1
-mapper = BatchAsciiMapper(transform, target_geometry, MappingStrategy.MAX_CELL_AREA)
-matrix = mapper.build_mapping_matrix("month_01.asc", "gol_to_ewe_mapping.npz")
+mapper = BatchAsciiMapper(transform, target_geometry, definition.mapping_strategy)
+matrix = mapper.build_mapping_matrix("nwmed.asc", "nwmed_to_anchovybay_mapping.npz")
 
 # phase 2
-matrix = MappingMatrix.read("gol_to_ewe_mapping.npz")
+matrix = MappingMatrix.read("nwmed_to_anchovybay_mapping.npz")
 mapper.warp_glob("input_monthly", "*.asc", "output_monthly", matrix)
 
 # Optional: include diagnostics per file
-basemap = AsciiGridReader.read("basemap.asc")
 mapper.warp_glob_with_diagnostics(
     "input_monthly", "*.asc",
     "output_monthly", matrix,
