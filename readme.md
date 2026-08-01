@@ -59,6 +59,11 @@ transform = definition.to_transform()
 basemap = AsciiGridReader.read("anchovybay.asc")
 target_geometry = basemap.geometry
 
+definition = MappingDefinition.read("nwmed_to_anchovybay_mapping.json")
+transform = definition.to_transform()
+basemap = AsciiGridReader.read("anchovybay.asc")
+target_geometry = basemap.geometry
+
 # phase 1
 mapper = BatchAsciiMapper(
     transform,
