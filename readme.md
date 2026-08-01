@@ -11,7 +11,7 @@ piecewise-affine geometry and bilinear sampling.
   Includes `MappingMatrix` for cached mappings and `BatchAsciiMapper` for
   two-phase ASCII processing.
 - `diagnostics/`: mapping-coverage classification and summary helpers.
-- `io/`: ESRI ASCII grid reader/writer.
+- `envstretcher/io/`: ESRI ASCII grid reader/writer.
 - `tests/`: pytest suite for geometry, mapping, and diagnostics behavior.
 - `main.py`: synthetic end-to-end example.
 
@@ -49,7 +49,7 @@ Use the project virtual environment:
 Example:
 
 ```python
-from io.ascii_reader import AsciiGridReader
+from envstretcher.io.ascii_reader import AsciiGridReader
 from envstretcher.batch_ascii_mapper import BatchAsciiMapper
 from envstretcher.mapping_definition import MappingDefinition
 from envstretcher.mapping_matrix import MappingMatrix
@@ -60,7 +60,18 @@ basemap = AsciiGridReader.read("anchovybay.asc")
 target_geometry = basemap.geometry
 
 # phase 1
-mapper = BatchAsciiMapper(transform, target_geometry, definition.mapping_strategy)
+mapper = BatchAsciiMapper(
+    transform,
+    target_geometry,
+    definition.mapping_strategy,
+    use_index_control_points=True,  # EwE control points are grid-index based
+)
+coverage = mapper.diagnose_template_coverage(
+    template_source_ascii="nwmed.asc",
+    basemap=basemap,
+    diagnostics_output_file="nwmed_phase1_coverage.asc",
+)
+print(coverage.all_water_cells_covered)
 matrix = mapper.build_mapping_matrix("nwmed.asc", "nwmed_to_anchovybay_mapping.npz")
 
 # phase 2

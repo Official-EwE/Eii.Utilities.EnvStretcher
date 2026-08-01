@@ -3,8 +3,8 @@ from __future__ import annotations
 import numpy as np
 
 from diagnostics.mapping_diagnostics import MappingDiagnostics
-from io.ascii_reader import AsciiGridReader
-from io.ascii_writer import AsciiGridWriter
+from envstretcher.io.ascii_reader import AsciiGridReader
+from envstretcher.io.ascii_writer import AsciiGridWriter
 from envstretcher.batch_ascii_mapper import BatchAsciiMapper
 from envstretcher.bilinear_sampler import BilinearSampler
 from envstretcher.control_point import ControlPoint
@@ -170,6 +170,5 @@ def test_batch_warp_with_diagnostics(tmp_path) -> None:
     assert warped.values.shape == (6, 6)
     assert diag.values.shape == (6, 6)
     assert np.all(np.isfinite(warped.values[1:5, 1:5]))
-
 
 
