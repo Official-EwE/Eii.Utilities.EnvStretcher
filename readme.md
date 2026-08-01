@@ -11,7 +11,7 @@ piecewise-affine geometry and bilinear sampling.
   Includes `MappingMatrix` for cached mappings and `BatchAsciiMapper` for
   two-phase ASCII processing.
 - `diagnostics/`: mapping-coverage classification and summary helpers.
-- `io/`: ESRI ASCII grid reader/writer.
+- `envstretcher/io/`: ESRI ASCII grid reader/writer.
 - `tests/`: pytest suite for geometry, mapping, and diagnostics behavior.
 - `main.py`: synthetic end-to-end example.
 
@@ -49,29 +49,15 @@ Use the project virtual environment:
 Example:
 
 ```python
-from io.ascii_reader import AsciiGridReader
+from envstretcher.io.ascii_reader import AsciiGridReader
 from envstretcher.batch_ascii_mapper import BatchAsciiMapper
-from envstretcher.control_point import ControlPoint
-from envstretcher.mapping_definition import MappingStrategy
+from envstretcher.mapping_definition import MappingDefinition
 from envstretcher.mapping_matrix import MappingMatrix
-from envstretcher.piecewise_affine_transform import PiecewiseAffineTransform
-from envstretcher.raster_geometry import RasterGeometry
 
-control_points = [
-    ControlPoint(id="1", source_x=0.0, source_y=0.0, target_x=0.0, target_y=0.0),
-    ControlPoint(id="2", source_x=10.0, source_y=0.0, target_x=6.0, target_y=0.0),
-    ControlPoint(id="3", source_x=10.0, source_y=10.0, target_x=6.0, target_y=6.0),
-    ControlPoint(id="4", source_x=0.0, source_y=10.0, target_x=0.0, target_y=6.0),
-]
-transform = PiecewiseAffineTransform(control_points=control_points)
-
-target_geometry = RasterGeometry(
-    rows=6,
-    columns=6,
-    x_min=0.0,
-    y_min=0.0,
-    cell_size=1.0,
-)
+definition = MappingDefinition.read("nwmed_to_anchovybay_mapping.json")
+transform = definition.to_transform()
+basemap = AsciiGridReader.read("anchovybay.asc")
+target_geometry = basemap.geometry
 
 definition = MappingDefinition.read("nwmed_to_anchovybay_mapping.json")
 transform = definition.to_transform()
@@ -79,7 +65,18 @@ basemap = AsciiGridReader.read("anchovybay.asc")
 target_geometry = basemap.geometry
 
 # phase 1
-mapper = BatchAsciiMapper(transform, target_geometry, definition.mapping_strategy)
+mapper = BatchAsciiMapper(
+    transform,
+    target_geometry,
+    definition.mapping_strategy,
+    use_index_control_points=True,  # EwE control points are grid-index based
+)
+coverage = mapper.diagnose_template_coverage(
+    template_source_ascii="nwmed.asc",
+    basemap=basemap,
+    diagnostics_output_file="nwmed_phase1_coverage.asc",
+)
+print(coverage.all_water_cells_covered)
 matrix = mapper.build_mapping_matrix("nwmed.asc", "nwmed_to_anchovybay_mapping.npz")
 
 # phase 2
@@ -94,3 +91,5 @@ mapper.warp_glob_with_diagnostics(
     diagnostics_directory="output_diagnostics"
 )
 ```
+## Funding acknowledgement
+Eii.EnvStretcher is developed with the support of the  European Union under the Horizon Europe Program, Grant Agreement No. 101157456 (SURIMI).
