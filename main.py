@@ -201,6 +201,7 @@ def run_batch_example() -> None:
     from envstretcher.batch_ascii_mapper import BatchAsciiMapper
     from envstretcher.mapping_definition import MappingDefinition
     from envstretcher.mapping_matrix import MappingMatrix
+    from diagnostics.triangulation_shapefile_exporter import TriangulationShapefileExporter
 
     definition = MappingDefinition.read("Resources/nwmed_to_anchovybay_mapping.json")
     transform = definition.to_transform()
@@ -225,19 +226,27 @@ def run_batch_example() -> None:
         f"outside={coverage.outside_mapping_cells}, "
         f"source_nodata={coverage.source_nodata_cells}"
     )
+
+    # Export triangulation shapefiles in world (lon/lat) coordinates.
+    # build_world_space_transform converts grid-index control points to the
+    # actual map coordinates of the source and target rasters.
+    source_grid = AsciiGridReader.read("Resources/nwmed.asc")
+    world_transform = mapper.build_world_space_transform(
+        source_geometry=source_grid.geometry,
+        target_geometry=target_geometry,
+    )
+    exporter = TriangulationShapefileExporter(world_transform)
+    exporter.write(
+        source_shapefile="D:/nwmed_triangulation_source",
+        target_shapefile="D:/nwmed_triangulation_target",
+    )
+    print("Triangulation shapefiles written.")
+
     matrix = mapper.build_mapping_matrix("Resources/nwmed.asc", "D:/nwmed_to_anchovybay_mapping.npz")
 
     # phase 2
     matrix = MappingMatrix.read("D:/nwmed_to_anchovybay_mapping.npz")
     mapper.warp_glob("D:/Projects/2026/ActNow/WP3/NWMed model (FutureMares)/GSA0607EcospaceActNow/Drivers/drivers_annual", "*.asc", "output_monthly", matrix)
-
-    # Optional: include diagnostics per file
-    mapper.warp_glob_with_diagnostics(
-        "input_monthly", "*.asc",
-        "output_monthly", matrix,
-        basemap,
-        diagnostics_directory="output_diagnostics"
-    )
 
     mapper = BatchAsciiMapper(
         transform=transform,

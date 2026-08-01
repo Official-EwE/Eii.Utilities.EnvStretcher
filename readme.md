@@ -86,3 +86,5 @@ mapper.warp_glob_with_diagnostics(
     diagnostics_directory="output_diagnostics"
 )
 ```
+## Funding acknowledgement
+Eii.EnvStretcher is developed with the support of the  European Union under the Horizon Europe Program, Grant Agreement No. 101157456 (SURIMI).

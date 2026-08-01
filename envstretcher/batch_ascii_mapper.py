@@ -106,6 +106,28 @@ class BatchAsciiMapper:
             diagnostics=diagnostics_grid,
         )
 
+    def build_world_space_transform(
+        self,
+        source_geometry: RasterGeometry,
+        target_geometry: RasterGeometry,
+    ) -> PiecewiseAffineTransform:
+        """
+        Return a PiecewiseAffineTransform whose control-point coordinates
+        are expressed in world/map space (x, y) for the given raster
+        geometries.
+
+        When use_index_control_points is False the stored transform is
+        already in world space and is returned unchanged.  When True, grid
+        index coordinates (col, row from top-left) are converted to world
+        coordinates using x_min, y_max and cell_size of each geometry.
+
+        Use this transform when producing GIS output such as shapefiles.
+        """
+        return self._create_transform_for_geometries(
+            source_geometry=source_geometry,
+            target_geometry=target_geometry,
+        )
+
     def _create_transform_for_geometries(
         self,
         source_geometry: RasterGeometry,
