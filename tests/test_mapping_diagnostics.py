@@ -20,7 +20,7 @@ def test_mapping_diagnostics_classifies_all_cell_types() -> None:
     - a fictional 10 x 10 source raster;
     - a fictional 6 x 6 EwE basemap;
     - a target mapping surface that deliberately excludes some water cells;
-    - a source NoData cell that invalidates one bilinear sample.
+    - a small source NoData patch that invalidates one bilinear sample.
     """
 
     source = create_source_raster()
@@ -118,9 +118,13 @@ def create_source_raster() -> RasterGrid:
     # Target cell centre (2.5, 3.5) maps to source coordinate (3, 5).
     #
     # That coordinate lies between source rows 4/5 and columns 2/3.
-    # Setting one contributing neighbour to NoData therefore makes
-    # the bilinear sample invalid.
+    # Setting all contributing neighbours to NoData ensures this sample
+    # remains SOURCE_NODATA even when interpolation excludes invalid
+    # neighbours and renormalizes weights.
     values[4, 2] = SOURCE_NODATA
+    values[4, 3] = SOURCE_NODATA
+    values[5, 2] = SOURCE_NODATA
+    values[5, 3] = SOURCE_NODATA
 
     return RasterGrid(
         geometry=geometry,

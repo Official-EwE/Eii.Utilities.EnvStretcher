@@ -34,7 +34,9 @@ Use the project virtual environment:
 1. Build a `PiecewiseAffineTransform` from control points (and optional triangles).
 2. For each target cell centre, map target coordinates to source coordinates.
 3. Sample source values with `BilinearSampler`.
-4. Write values into a new `RasterGrid`.
+4. Write values into a new `RasterGrid` (source nodata and non-positive
+   source cells are excluded from bilinear interpolation and remaining
+   weights are renormalized).
 5. Optionally classify coverage with `MappingDiagnostics`.
 
 ## Two-phase batch workflow
