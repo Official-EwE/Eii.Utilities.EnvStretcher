@@ -12,15 +12,18 @@ class BilinearSampler:
     nearest edge-cell centre. Coordinates outside the raster footprint
     return nodata.
 
-    If a contributing source cell contains nodata, the sample also returns
-    nodata.
+    During interpolation, source nodata values (and optionally non-positive
+    source values used as a land mask) are excluded and weights are
+    renormalized over the remaining valid neighbours.
     """
 
     def __init__(
         self,
         grid: RasterGrid,
+        treat_nonpositive_as_nodata: bool = True,
     ) -> None:
         self._grid = grid
+        self._treat_nonpositive_as_nodata = treat_nonpositive_as_nodata
 
     @property
     def grid(self) -> RasterGrid:
@@ -28,6 +31,15 @@ class BilinearSampler:
 
     def is_nodata(self, value) -> bool:
         return self._grid.is_nodata(value)
+
+    def _is_invalid_source_value(self, value: float) -> bool:
+        if self._grid.is_nodata(value):
+            return True
+
+        return bool(
+            self._treat_nonpositive_as_nodata
+            and value <= 0.0
+        )
 
     def sample(
         self,
@@ -39,7 +51,7 @@ class BilinearSampler:
 
         Returns the grid's nodata value when:
         - the coordinate lies outside the raster footprint; or
-        - a cell contributing to the interpolation contains nodata.
+        - all contributing neighbours are invalid.
         """
 
         if not np.isfinite(x) or not np.isfinite(y):
@@ -106,7 +118,8 @@ class BilinearSampler:
             ),
         )
 
-        result = 0.0
+        weighted_sum = 0.0
+        valid_weight_sum = 0.0
 
         for value, weight in samples:
             # A zero-weight neighbour does not contribute and therefore
@@ -114,9 +127,15 @@ class BilinearSampler:
             if weight <= 0.0:
                 continue
 
-            if self._grid.is_nodata(float(value)):
-                return float(self._grid.nodata)
+            source_value = float(value)
 
-            result += weight * float(value)
+            if self._is_invalid_source_value(source_value):
+                continue
 
-        return result
+            weighted_sum += weight * source_value
+            valid_weight_sum += weight
+
+        if valid_weight_sum <= 0.0:
+            return float(self._grid.nodata)
+
+        return weighted_sum / valid_weight_sum
