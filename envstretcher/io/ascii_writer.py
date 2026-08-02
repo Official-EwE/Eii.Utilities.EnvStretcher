@@ -21,17 +21,20 @@ class AsciiGridWriter:
 
         geometry = raster.geometry
 
+        nodata = raster.nodata if np.isfinite(raster.nodata) else -9999.0
+        values = np.where(np.isnan(raster.values), nodata, raster.values)
+
         with filename.open("w", encoding="utf-8", newline="\n") as stream:
             stream.write(f"ncols         {geometry.columns}\n")
             stream.write(f"nrows         {geometry.rows}\n")
             stream.write(f"xllcorner     {geometry.x_min:.12g}\n")
             stream.write(f"yllcorner     {geometry.y_min:.12g}\n")
             stream.write(f"cellsize      {geometry.cell_size:.12g}\n")
-            stream.write(f"NODATA_value  {raster.nodata:.12g}\n")
+            stream.write(f"NODATA_value  {nodata:.12g}\n")
 
             fmt = f"%.{decimals}f"
 
-            for row in raster.values:
+            for row in values:
                 np.savetxt(
                     stream,
                     row.reshape(1, -1),
