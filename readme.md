@@ -71,9 +71,13 @@ Use the project virtual environment:
 Example:
 
 The following code demonstrates a two-phase workflow for mapping monthly environmental rasters from a source domain (nwmed) to a target domain (anchovybay). In phase 1, it reads the mapping definition, computes the mapping matrix, and diagnoses coverage. In phase 2, it applies the mapping matrix to warp the input rasters and optionally generates diagnostics for each output file.
+
 The source points JSON files was created manually, and produced the following two rectangle shapefiles:
 ![nwmed_triangulation.png](Resources/nwmed_triangulation.png)
+*The North Western Mediterreanan depth map with source mapping triangles*
+
 ![anchovybay_triangulation.png](Resources/anchovybay_triangulation.png)
+*The Anchovy Bay depth map with target mapping triangles*
 
 ```python
 from envstretcher.io.ascii_reader import AsciiGridReader
