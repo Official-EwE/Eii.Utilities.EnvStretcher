@@ -3,6 +3,17 @@
 `EnvStretcher` maps values from a source raster to a target raster using
 piecewise-affine geometry and bilinear sampling.
 
+## Why EnvStretcher?
+
+Many ecosystem models require spatially explicit environmental forcing 
+(temperature, primary production, salinity, etc.), but suitable forcing 
+datasets are often unavailable for fictional, educational or highly 
+idealized model domains. EnvStretcher provides a reproducible way to 
+remap existing environmental rasters onto a different model domain using 
+manually defined spatial correspondences. It is intended for teaching models,
+proof-of-concept studies, sensitivity analyses and rapid prototyping—not 
+as a replacement for statistical or dynamical downscaling.
+
 ## What is in this repository
 
 - `envstretcher/`: core mapping, raster geometry, and sampling primitives.
@@ -14,6 +25,15 @@ piecewise-affine geometry and bilinear sampling.
 - `envstretcher/io/`: ESRI ASCII grid reader/writer.
 - `tests/`: pytest suite for geometry, mapping, and diagnostics behavior.
 - `main.py`: synthetic end-to-end example.
+
+## Feature list
+
+- Piecewise affine mapping
+- Optional manual triangulation
+- Bilinear interpolation with NaN-aware weighting
+- Cached MappingMatrix for batch processing
+- Coverage diagnostics for source-to-target mapping
+- Shapefile export for visual inspection
 
 ## Running tests
 
@@ -50,6 +70,11 @@ Use the project virtual environment:
 
 Example:
 
+The following code demonstrates a two-phase workflow for mapping monthly environmental rasters from a source domain (nwmed) to a target domain (anchovybay). In phase 1, it reads the mapping definition, computes the mapping matrix, and diagnoses coverage. In phase 2, it applies the mapping matrix to warp the input rasters and optionally generates diagnostics for each output file.
+The source points JSON files was created manually, and produced the following two rectangle shapefiles:
+![nwmed_triangulation.png](Resources/nwmed_triangulation.png)
+![anchovybay_triangulation.png](Resources/anchovybay_triangulation.png)
+
 ```python
 from envstretcher.io.ascii_reader import AsciiGridReader
 from envstretcher.batch_ascii_mapper import BatchAsciiMapper
@@ -83,7 +108,7 @@ matrix = mapper.build_mapping_matrix("nwmed.asc", "nwmed_to_anchovybay_mapping.n
 
 # phase 2
 matrix = MappingMatrix.read("nwmed_to_anchovybay_mapping.npz")
-mapper.warp_glob("input_monthly", "*.asc", "output_monthly", matrix)
+mapper.warp_glob("input/drivers", "*.asc", "output/drivers", matrix)
 
 # Optional: include diagnostics per file
 mapper.warp_glob_with_diagnostics(
@@ -94,4 +119,4 @@ mapper.warp_glob_with_diagnostics(
 )
 ```
 ## Funding acknowledgement
-Eii.EnvStretcher is developed with the support of the  European Union under the Horizon Europe Program, Grant Agreement No. 101157456 (SURIMI).
+Eii.EnvStretcher is developed within the Horizon Europe SURIMI project, Grant Agreement No. 101157456.

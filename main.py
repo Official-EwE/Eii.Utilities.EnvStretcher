@@ -218,7 +218,7 @@ def run_batch_example() -> None:
     coverage = mapper.diagnose_template_coverage(
         template_source_ascii="Resources/nwmed.asc",
         basemap=basemap,
-        diagnostics_output_file="D:/nwmed_phase1_coverage.asc",
+        diagnostics_output_file="output/nwmed_phase1_coverage.asc",
     )
     print(
         "Phase 1 coverage: "
@@ -237,16 +237,16 @@ def run_batch_example() -> None:
     )
     exporter = TriangulationShapefileExporter(world_transform)
     exporter.write(
-        source_shapefile="D:/nwmed_triangulation_source",
-        target_shapefile="D:/nwmed_triangulation_target",
+        source_shapefile="output/nwmed_triangulation_source",
+        target_shapefile="output/nwmed_triangulation_target",
     )
     print("Triangulation shapefiles written.")
 
     matrix = mapper.build_mapping_matrix("Resources/nwmed.asc", "D:/nwmed_to_anchovybay_mapping.npz")
 
     # phase 2
-    matrix = MappingMatrix.read("D:/nwmed_to_anchovybay_mapping.npz")
-    mapper.warp_glob("D:/Projects/2026/ActNow/WP3/NWMed model (FutureMares)/GSA0607EcospaceActNow/Drivers/drivers_annual", "*.asc", "output_monthly", matrix)
+    matrix = MappingMatrix.read("output/nwmed_to_anchovybay_mapping.npz")
+    mapper.warp_glob("input/GSA0607EcospaceActNow/Drivers", "*.asc", "output/drivers", matrix)
 
     mapper = BatchAsciiMapper(
         transform=transform,
