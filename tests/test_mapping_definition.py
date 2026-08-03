@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 import pytest
 
 from envstretcher.mapping_definition import MappingDefinition
@@ -67,3 +70,62 @@ def test_to_transform_uses_explicit_triangles() -> None:
     assert len(transform.triangles) == 1
     assert set(transform.triangle_ids[0]) == {"1", "2", "3"}
 
+
+def test_write_round_trips_mapping_definition(
+    tmp_path: Path,
+) -> None:
+    data = {
+        "points": [
+            {
+                "id": "1",
+                "name": "North breakwater",
+                "source": [0, 0],
+                "target": [10, 10],
+            },
+            {
+                "id": "2",
+                "source": [1, 0],
+                "target": [11, 10],
+            },
+            {
+                "id": "3",
+                "source": [0, 1],
+                "target": [10, 11],
+            },
+        ],
+        "triangles": [["1", "2", "3"]],
+        "mapping_strategy": "max_cell_area",
+    }
+
+    mapping = MappingDefinition.from_dict(data)
+    output_file = tmp_path / "mapping.json"
+
+    mapping.write(output_file)
+
+    written_data = json.loads(
+        output_file.read_text(encoding="utf-8")
+    )
+
+    assert written_data == {
+        "points": [
+            {
+                "id": "1",
+                "name": "North breakwater",
+                "source": [0.0, 0.0],
+                "target": [10.0, 10.0],
+            },
+            {
+                "id": "2",
+                "source": [1.0, 0.0],
+                "target": [11.0, 10.0],
+            },
+            {
+                "id": "3",
+                "source": [0.0, 1.0],
+                "target": [10.0, 11.0],
+            },
+        ],
+        "triangles": [["1", "2", "3"]],
+        "mapping_strategy": "max_cell_area",
+    }
+    assert MappingDefinition.read(output_file) == mapping

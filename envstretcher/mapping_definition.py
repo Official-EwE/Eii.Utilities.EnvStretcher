@@ -39,6 +39,38 @@ class MappingDefinition:
     triangles: tuple[tuple[str, str, str], ...] | None = None
     mapping_strategy: MappingStrategy = MappingStrategy.CENTROID
 
+    def to_dict(self) -> dict[str, Any]:
+        data: dict[str, Any] = {
+            "points": [
+                {
+                    "id": point.id,
+                    **(
+                        {"name": point.name}
+                        if point.name
+                        else {}
+                    ),
+                    "source": [
+                        point.source_x,
+                        point.source_y,
+                    ],
+                    "target": [
+                        point.target_x,
+                        point.target_y,
+                    ],
+                }
+                for point in self.points
+            ],
+            "mapping_strategy": self.mapping_strategy.value,
+        }
+
+        if self.triangles is not None:
+            data["triangles"] = [
+                list(triangle)
+                for triangle in self.triangles
+            ]
+
+        return data
+
     @property
     def source_points(self) -> FloatArray:
         return np.asarray(
@@ -100,6 +132,17 @@ class MappingDefinition:
 
         return cls.from_dict(data)
 
+    def write(self, filename: str | Path) -> None:
+        filename = Path(filename)
+
+        with filename.open("w", encoding="utf-8") as stream:
+            json.dump(
+                self.to_dict(),
+                stream,
+                indent=2,
+            )
+            stream.write("\n")
+
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> MappingDefinition:
         raw_points = data.get("points")
@@ -125,6 +168,9 @@ class MappingDefinition:
             point_id = str(
                 raw_point.get("id", index + 1)
             )
+            point_name = str(
+                raw_point.get("name", "")
+            )
 
             source = cls._read_coordinate(
                 raw_point,
@@ -145,6 +191,7 @@ class MappingDefinition:
                     source_y=source[1],
                     target_x=target[0],
                     target_y=target[1],
+                    name=point_name,
                 )
             )
 
