@@ -81,28 +81,44 @@ from envstretcher.batch_ascii_mapper import BatchAsciiMapper
 from envstretcher.mapping_definition import MappingDefinition
 from envstretcher.mapping_matrix import MappingMatrix
 
+# Read mapping definition and source basemap geometry
 definition = MappingDefinition.read("nwmed_to_anchovybay_mapping.json")
+# Construct a piecewise affine transform from the definition
 transform = definition.to_transform()
+# Read target basemap geometry
 basemap = AsciiGridReader.read("anchovybay.asc")
+# Wrap the target geometry for mapping
 target_geometry = basemap.geometry
 
 # phase 1
+# =======
+
+# Compute mapping matrix and diagnose coverage
 mapper = BatchAsciiMapper(
     transform,
     target_geometry,
     definition.mapping_strategy,
     use_index_control_points=True,  # EwE control points are grid-index based
 )
+# Diagnose coverage of the target basemap by the source template
 coverage = mapper.diagnose_template_coverage(
     template_source_ascii="nwmed.asc",
     basemap=basemap,
     diagnostics_output_file="nwmed_phase1_coverage.asc",
 )
+# Give the user a quick summary of the coverage
 print(coverage.all_water_cells_covered)
+# Save the mapping matrix for later use in phase 2
 matrix = mapper.build_mapping_matrix("nwmed.asc", "nwmed_to_anchovybay_mapping.npz")
 
+# ...
+
 # phase 2
+# =======
+
+# Read matrix back in and apply to each monthly raster
 matrix = MappingMatrix.read("nwmed_to_anchovybay_mapping.npz")
+# Warp all monthly rasters in the input directory to the output directory
 mapper.warp_glob("input/drivers", "*.asc", "output/drivers", matrix)
 
 # Optional: include diagnostics per file
@@ -114,4 +130,5 @@ mapper.warp_glob_with_diagnostics(
 )
 ```
 ## Funding acknowledgement
-Eii.EnvStretcher is developed within the Horizon Europe SURIMI project, Grant Agreement No. 101157456.
+Eii.EnvStretcher is developed by the Ecopath with Ecosim (EwE) development team. 
+Development was funded by the Horizon Europe SURIMI project, Grant Agreement No. 101157456.

@@ -5,8 +5,8 @@ class CoverageCode(IntEnum):
     """
     Classification assigned to each target cell during mapping diagnostics.
 
-    LAND
-        Target basemap cell is land (depth <= 0). No mapping attempted.
+    EXCLUDED
+        Target or Source cell is excluded. No mapping attempted.
 
     VALID_DATA
         Target cell mapped successfully and a valid source value was obtained.
@@ -19,7 +19,7 @@ class CoverageCode(IntEnum):
         Target cell centre lies outside the target control-point triangulation.
     """
 
-    LAND = 1
+    EXCLUDED = 1
 
     VALID_DATA = 2
 
@@ -31,7 +31,7 @@ class CoverageCode(IntEnum):
     def description(self) -> str:
 
         return {
-            CoverageCode.LAND: "Land",
+            CoverageCode.EXCLUDED: "Excluded",
             CoverageCode.VALID_DATA: "Mapped successfully",
             CoverageCode.SOURCE_NODATA: "Mapped, but source has no data",
             CoverageCode.OUTSIDE_MAPPING: "Outside target mapping",
