@@ -1,0 +1,50 @@
+{
+	"title": "Ecopath with Ecosim (EwE) Desktop for Windows",
+	"description": "Ecopath with Ecosim (EwE) is an ecosystem modelling software suite for constructing, analysing and simulating food-web models, including temporal dynamics with Ecosim and spatial-temporal dynamics with Ecospace.",
+	"upload_type": "software",
+	"access_right": "open",
+	"license": "EUPL-1.2",
+	"language": "eng",
+
+	"creators": [
+		{
+			"name": "Steenbeek, Jeroen",
+			"affiliation": "Ecopath International Initiative",
+			"orcid": "0000-0002-7878-8075",
+			"type": "ProjectManager"
+		}
+	],
+
+	"contributors": [
+		{
+			"name": "Ecopath International Initiative",
+			"type": "ResearchGroup"
+		}
+	],
+
+	"keywords": [
+		"Ecopath with Ecosim",
+		"EwE",
+		"marine ecosystem modelling",
+		"spatial interpolations",
+		"raster remapping",
+		"training and eduction"
+	],
+
+	"communities": [
+		{ "identifier": "SURIMI" },
+		{ "identifier": "ewe" }
+	],
+
+	"grants": [
+		{ "id": "10.13039/501100000780::101157456" }
+	],
+
+	"related_identifiers": [
+		{
+			"identifier": "https://github.com/Official-EwE/Eii.Utilities.EnvStretcher.git",
+			"relation": "isSupplementTo",
+			"resource_type": "software"
+		}
+	]
+}
